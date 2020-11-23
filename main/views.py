@@ -3,9 +3,35 @@ from .models import *
 from django.urls import reverse_lazy
 from django.contrib.auth.models import User
 from .forms import *
-from django.views.generic import View
+from django.views.generic import View, DetailView
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from rest_framework import generics, mixins
+from .serializer import *
+
+
+
+class TaskListView(generics.ListAPIView):
+	queryset = Task.objects.all()
+	serializer_class = TaskListSerializer
+
+
+class TaskCreateView(generics.CreateAPIView):
+	serializer_class = TaskSerializer
+
+class TaskDetailView(generics.RetrieveAPIView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+	queryset = Task.objects.all()
+	serializer_class = TaskDetailSerializer
+
+	def get(self, request, *args, **kwargs):
+		return self.retrieve(request, *args, **kwargs)
+
+	def put(self, request, *args, **kwargs):
+		return self.update(request, *args, **kwargs)
+
+	def delete(self, request, *args, **kwargs):
+		return self.destroy(request, *args, **kwargs)
+
 
 def main(request):
 	space = Space.objects.filter(assign=request.user.id)
